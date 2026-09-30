@@ -1,5 +1,5 @@
 abstract class HeroContract {
-    static const String cacheTableName = "cache_heroes";
+    static const String cacheTable = "cache_heroes";
     static const String squadTable = "squad_table";
     
     
