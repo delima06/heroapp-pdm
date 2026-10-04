@@ -21,7 +21,6 @@ class _AgentsScreenState extends State<AgentsScreen> {
   @override
   void initState() {
     super.initState();
-    // Ouve quando uma nova página precisa ser carregada
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
