@@ -10,12 +10,14 @@ import 'screens/squad_detail_screen.dart';
 import 'screens/mission_screen.dart';
 
 void main() async {
+  // Garante a inicialização do Flutter antes de operações assíncronas
   WidgetsFlutterBinding.ensureInitialized();
+  // Padrão Aula 11: Carrega dependências e dados do SQLite antes do primeiro frame
   final data = await ConfigureProviders.createDependencyTree();
 
   runApp(
     MultiProvider(
-      providers: data.providers,
+      providers: data.providers, // Injeta a lista de SingleChildWidget
       child: const MyApp(),
     ),
   );

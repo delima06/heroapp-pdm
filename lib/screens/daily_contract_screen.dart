@@ -14,6 +14,8 @@ class _DailyContractScreenState extends State<DailyContractScreen> {
   @override
   void initState() {
     super.initState();
+    // addPostFrameCallback adia a chamada assíncrona até a conclusão da primeira renderização da árvore de widgets,
+    // prevenindo exceções de setState() durante a fase de build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HeroProvider>().loadDailyHero();
     });
@@ -27,6 +29,7 @@ class _DailyContractScreenState extends State<DailyContractScreen> {
         backgroundColor: Colors.teal.shade800,
         foregroundColor: Colors.white,
       ),
+      // Consumer<HeroProvider>: escuta mudanças no HeroProvider e reconstrói reativamente apenas esta subárvore
       body: Consumer<HeroProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {

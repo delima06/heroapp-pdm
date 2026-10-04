@@ -15,17 +15,20 @@ class _AgentsScreenState extends State<AgentsScreen> {
   static const _pageSize = 20;
   final HeroApiService _apiService = HeroApiService();
 
+  // Controlador de paginação infinita: gerencia o índice da página (int) e a lista de itens
   final PagingController<int, HeroModel> _pagingController =
       PagingController(firstPageKey: 1);
 
   @override
   void initState() {
     super.initState();
+    // Registra listener que dispara requisições de página sob demanda ao aproximar do final do scroll
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
   }
 
+  // Executa busca assíncrona da fatia de dados e atualiza o estado interno do PagingController
   Future<void> _fetchPage(int pageKey) async {
     try {
       final newItems = await _apiService.fetchHeroes(
@@ -33,20 +36,24 @@ class _AgentsScreenState extends State<AgentsScreen> {
         limit: _pageSize,
       );
 
+      // Critério de parada: se a quantidade retornada for menor que o tamanho da página, encerra a paginação
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
       } else {
+        // Se houver mais registros, incrementa a chave da página e adiciona os itens ao buffer
         final nextPageKey = pageKey + 1;
         _pagingController.appendPage(newItems, nextPageKey);
       }
     } catch (error) {
+      // Repassa a exceção para que o PagedListView renderize o widget de erro e ação de retry
       _pagingController.error = error;
     }
   }
 
   @override
   void dispose() {
+    // Libera recursos e encerra os streams de paginação para evitar memory leak
     _pagingController.dispose();
     super.dispose();
   }

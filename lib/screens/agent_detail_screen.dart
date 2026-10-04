@@ -132,7 +132,9 @@ class AgentDetailScreen extends StatelessWidget {
     );
   }
 
+  // Constrói a barra de progresso visual de atributo usando a biblioteca primer_progress_bar
   Widget _buildStatBar(String title, int value, Color color) {
+    // Normalização defensiva: garante que o valor numérico permaneça estritamente no intervalo [0, 100]
     final validValue = value.clamp(0, 100);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
@@ -157,6 +159,7 @@ class AgentDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
+          // PrimerProgressBar: componente de visualização gráfica composto por segmentos ponderados
           PrimerProgressBar(
             segments: [
               Segment(
@@ -165,7 +168,7 @@ class AgentDetailScreen extends StatelessWidget {
                 valueLabel: Text('$validValue%'),
               ),
             ],
-            maxTotalValue: 100,
+            maxTotalValue: 100, // Define o limite máximo da escala para proporcionalidade percentual
           ),
         ],
       ),

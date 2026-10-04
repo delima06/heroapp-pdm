@@ -114,20 +114,24 @@ class _MissionScreenState extends State<MissionScreen> {
     });
   }
 
+  // Executa a resolução do turno: compara os valores dos atributos e registra métricas
   void _confirmCombat() {
     if (_selectedAgent == null || _roundResolved) return;
 
     final round = _rounds[_currentRoundIndex];
+    // Recupera o valor numérico do atributo exigido na rodada atual
     final agentStat = _selectedAgent!.getStatByName(round.statKey);
     final enemyStat = round.enemy.getStatByName(round.statKey);
 
     setState(() {
       _roundResolved = true;
+      // Registra o ID do herói no Set de utilizados para bloqueá-lo em rodadas futuras da mesma missão
       _usedHeroIds.add(_selectedAgent!.id);
 
+      // Avaliação determinística do confronto
       if (agentStat > enemyStat) {
         _victories++;
-        _winningHeroes.add(_selectedAgent!);
+        _winningHeroes.add(_selectedAgent!); // Entra na lista elegível para premiação (+1 stat)
         _roundResultMessage = 'Vitória na Rodada! ($agentStat vs $enemyStat)';
         _roundResultColor = Colors.green.shade700;
       } else if (agentStat < enemyStat) {

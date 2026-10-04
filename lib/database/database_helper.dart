@@ -3,19 +3,23 @@ import 'package:path/path.dart';
 import '../models/HeroModel.dart';
 import 'hero_contract.dart';
 
+// Camada de Acesso a Dados (DAO / Helper) com padrão Singleton para gerenciar conexão com SQLite
 class DatabaseHelper {
+  // Padrão Singleton: construtor privado e instância estática evitam abertura de múltiplas conexões simultâneas
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   factory DatabaseHelper() => _instance;
   DatabaseHelper._internal();
 
   Database? _db;
 
+  // Lazy Initialization da conexão com o banco de dados
   Future<Database> get db async {
     if (_db != null) return _db!;
     _db = await initDb();
     return _db!;
   }
 
+  // Inicializa o banco relacional SQLite local definindo esquema DDL e controle de versão
   Future<Database> initDb() async {
     String? databasesPath = await getDatabasesPath();
     String path = join(databasesPath, "heroapp.db");

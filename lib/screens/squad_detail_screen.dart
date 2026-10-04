@@ -147,10 +147,10 @@ class SquadDetailScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       onPressed: () {
-                        // Caixa de diálogo usando awesome_dialog (Slide 9)
+                        // Modal com AwesomeDialog: bloqueia a interface até confirmação explícita do usuário
                         AwesomeDialog(
                           context: context,
-                          dialogType: DialogType.warning,
+                          dialogType: DialogType.warning, // Indicador semântico de ação destrutiva
                           animType: AnimType.bottomSlide,
                           title: 'Dispensar Agente',
                           desc: 'Tem certeza que deseja dispensar ${hero.name} do esquadrão? Essa vaga ficará livre.',
@@ -158,10 +158,11 @@ class SquadDetailScreen extends StatelessWidget {
                           btnOkText: 'Sim, Dispensar',
                           btnCancelOnPress: () {},
                           btnOkOnPress: () async {
+                            // Usa context.read dentro do callback assíncrono para despachar a ação sem redesenhar o modal
                             final provider = context.read<HeroProvider>();
                             await provider.dismissHero(hero.id);
                             if (context.mounted) {
-                              Navigator.pop(context);
+                              Navigator.pop(context); // Fecha a tela de detalhes retornando à listagem do esquadrão
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('${hero.name} foi dispensado do esquadrão.'),
