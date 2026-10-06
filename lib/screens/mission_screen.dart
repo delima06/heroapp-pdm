@@ -477,7 +477,7 @@ class _MissionScreenState extends State<MissionScreen> {
             itemCount: squad.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              childAspectRatio: 0.9,
+              childAspectRatio: 0.76,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
@@ -512,23 +512,23 @@ class _MissionScreenState extends State<MissionScreen> {
                         ClipOval(
                           child: CachedNetworkImage(
                             imageUrl: hero.imageUrl,
-                            width: 45,
-                            height: 45,
+                            width: 44,
+                            height: 44,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              width: 45,
-                              height: 45,
+                              width: 44,
+                              height: 44,
                               color: Colors.grey.shade200,
                             ),
                             errorWidget: (context, url, error) => Container(
-                              width: 45,
-                              height: 45,
+                              width: 44,
+                              height: 44,
                               color: Colors.grey.shade300,
                               child: const Icon(Icons.person, size: 24),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 5),
                         Text(
                           hero.name,
                           maxLines: 1,
@@ -536,13 +536,42 @@ class _MissionScreenState extends State<MissionScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.red.shade100 : Colors.indigo.shade50,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: isSelected ? Colors.red.shade300 : Colors.indigo.shade200,
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Text(
+                            hero.dominantStat,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected ? Colors.red.shade900 : Colors.indigo.shade900,
+                            ),
                           ),
                         ),
                         if (isUsed)
-                          const Text(
-                            'Exausto',
-                            style: TextStyle(fontSize: 10, color: Colors.red),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2.0),
+                            child: Text(
+                              'Exausto',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade700,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -559,7 +588,7 @@ class _MissionScreenState extends State<MissionScreen> {
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _roundResultColor.withOpacity(0.12),
+                color: _roundResultColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: _roundResultColor),
               ),
@@ -593,7 +622,9 @@ class _MissionScreenState extends State<MissionScreen> {
                     ? (_currentRoundIndex + 1 < _rounds.length
                         ? 'Avançar para o Próximo Round'
                         : 'Ver Resultado da Missão')
-                    : 'Confirmar Batalha com ${_selectedAgent!.name}',
+                    : (_selectedAgent != null
+                        ? 'Confirmar Batalha com ${_selectedAgent!.name}'
+                        : 'Selecione um Agente no Grid Acima'),
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
             ),
