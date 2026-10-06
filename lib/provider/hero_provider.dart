@@ -21,9 +21,109 @@ class HeroProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  // 5 heróis iniciais pré-definidos para o esquadrão base
+  static final List<HeroModel> _initialHeroes = [
+    HeroModel(
+      id: 620,
+      name: 'Spider-Man',
+      imageUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/sm/620-spider-man.jpg',
+      imagelLgUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/lg/620-spider-man.jpg',
+      intelligence: 90,
+      strength: 55,
+      speed: 67,
+      durability: 75,
+      power: 74,
+      combat: 85,
+      gender: 'Male',
+      race: 'Human',
+      alignment: 'good',
+      publisher: 'Marvel Comics',
+      fullName: 'Peter Parker',
+    ),
+    HeroModel(
+      id: 70,
+      name: 'Batman',
+      imageUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/sm/70-batman.jpg',
+      imagelLgUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/lg/70-batman.jpg',
+      intelligence: 100,
+      strength: 26,
+      speed: 27,
+      durability: 50,
+      power: 47,
+      combat: 100,
+      gender: 'Male',
+      race: 'Human',
+      alignment: 'good',
+      publisher: 'DC Comics',
+      fullName: 'Bruce Wayne',
+    ),
+    HeroModel(
+      id: 346,
+      name: 'Iron Man',
+      imageUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/sm/346-iron-man.jpg',
+      imagelLgUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/lg/346-iron-man.jpg',
+      intelligence: 100,
+      strength: 85,
+      speed: 58,
+      durability: 85,
+      power: 100,
+      combat: 64,
+      gender: 'Male',
+      race: 'Human',
+      alignment: 'good',
+      publisher: 'Marvel Comics',
+      fullName: 'Tony Stark',
+    ),
+    HeroModel(
+      id: 717,
+      name: 'Wolverine',
+      imageUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/sm/717-wolverine.jpg',
+      imagelLgUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/lg/717-wolverine.jpg',
+      intelligence: 63,
+      strength: 32,
+      speed: 50,
+      durability: 100,
+      power: 89,
+      combat: 100,
+      gender: 'Male',
+      race: 'Mutant',
+      alignment: 'good',
+      publisher: 'Marvel Comics',
+      fullName: 'Logan',
+    ),
+    HeroModel(
+      id: 659,
+      name: 'Thor',
+      imageUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/sm/659-thor.jpg',
+      imagelLgUrl: 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/lg/659-thor.jpg',
+      intelligence: 69,
+      strength: 100,
+      speed: 83,
+      durability: 100,
+      power: 100,
+      combat: 100,
+      gender: 'Male',
+      race: 'Asgardian',
+      alignment: 'good',
+      publisher: 'Marvel Comics',
+      fullName: 'Thor Odinson',
+    ),
+  ];
+
   // Sincroniza o estado em memória com a tabela SQLite e dispara atualização reativa nos widgets assinantes
   Future<void> loadSquad() async {
     _squad = await _dbHelper.getSquad();
+    
+    // Se o esquadrão tiver menos de 5 heróis, adiciona os heróis pré-definidos
+    if (_squad.length < 5) {
+      for (final hero in _initialHeroes) {
+        if (!isInSquad(hero.id) && _squad.length < 5) {
+          await _dbHelper.recruitHero(hero);
+          _squad.add(hero);
+        }
+      }
+    }
+    
     notifyListeners();
   }
 
