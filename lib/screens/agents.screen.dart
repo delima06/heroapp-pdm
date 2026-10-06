@@ -36,6 +36,10 @@ class _AgentsScreenState extends State<AgentsScreen> {
         limit: _pageSize,
       );
 
+      if (newItems.isEmpty && pageKey == 1) {
+        throw Exception('Servidor em inicialização. Toque em Tentar Novamente.');
+      }
+
       // Critério de parada: se a quantidade retornada for menor que o tamanho da página, encerra a paginação
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
@@ -117,9 +121,7 @@ class _AgentsScreenState extends State<AgentsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      hero.fullName.isNotEmpty && hero.fullName != 'Desconhecido'
-                          ? hero.fullName
-                          : hero.publisher,
+                      '${hero.gender} • ${hero.race}',
                       style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                     ),
                     const SizedBox(height: 4),

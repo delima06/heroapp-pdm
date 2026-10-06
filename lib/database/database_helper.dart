@@ -120,6 +120,18 @@ class DatabaseHelper {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
+  // Sorteia um herói aleatório armazenado no cache local SQLite
+  Future<HeroModel?> getRandomHeroFromCache() async {
+    Database database = await db;
+    List<Map<String, dynamic>> maps = await database.rawQuery(
+      'SELECT * FROM ${HeroContract.cacheTable} ORDER BY RANDOM() LIMIT 1',
+    );
+    if (maps.isNotEmpty) {
+      return HeroModel.fromMap(maps.first);
+    }
+    return null;
+  }
+
   // Retorna todos os heróis recrutados no esquadrão
   Future<List<HeroModel>> getSquad() async {
     Database database = await db;

@@ -221,7 +221,7 @@ class _DailyContractScreenState extends State<DailyContractScreen> {
                         ? null
                         : () async {
                             final success = await provider.recruitHero(hero);
-                            if (mounted) {
+                            if (context.mounted) {
                               if (success) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

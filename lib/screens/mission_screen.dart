@@ -6,6 +6,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import '../models/HeroModel.dart';
 import '../provider/hero_provider.dart';
 import '../services/hero_api_service.dart';
+import '../database/database_helper.dart';
 
 class MissionScreen extends StatefulWidget {
   const MissionScreen({super.key});
@@ -28,6 +29,7 @@ class _MissionRound {
 
 class _MissionScreenState extends State<MissionScreen> {
   final HeroApiService _apiService = HeroApiService();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
   final Random _random = Random();
 
   bool _isLoading = true;
@@ -84,8 +86,16 @@ class _MissionScreenState extends State<MissionScreen> {
       // Sorteia um inimigo fora do esquadrão
       HeroModel? enemy;
       while (enemy == null || squadIds.contains(enemy.id)) {
-        final randomId = _random.nextInt(563) + 1;
-        enemy = await _apiService.getHeroById(randomId);
+        final randomPage = _random.nextInt(563) + 1;
+        final pool = await _apiService.fetchHeroes(page: randomPage, limit: 1);
+        if (pool.isNotEmpty && !squadIds.contains(pool.first.id)) {
+          enemy = pool.first;
+        } else {
+          final cached = await _dbHelper.getRandomHeroFromCache();
+          if (cached != null && !squadIds.contains(cached.id)) {
+            enemy = cached;
+          }
+        }
       }
 
       // Sorteia o atributo em disputa na rodada
@@ -159,9 +169,10 @@ class _MissionScreenState extends State<MissionScreen> {
     }
   }
 
-  void _finishMission() {
+    void _finishMission() {
     final provider = context.read<HeroProvider>();
-    final isVictory = _victories > _defeats;
+    // Slide 13: Venceu mais da metade dos rounds
+    final isVictory = _victories > (_rounds.length / 2);
 
     if (isVictory) {
       // Sorteia um dos heróis vitoriosos para receber +1 de atributo
@@ -176,20 +187,103 @@ class _MissionScreenState extends State<MissionScreen> {
         context: context,
         dialogType: DialogType.success,
         animType: AnimType.bottomSlide,
-        title: 'Missão Cumprida!',
-        desc: 'Placar Final: $_victories Vitórias x $_defeats Derrotas.\n\n'
-            'Recompensa de Honra: ${rewardingHero.name} evoluiu e ganhou +1 em ${rewardedStat['label']}!',
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            children: [
+              const Text(
+                'Missão Cumprida!',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              // Slide 13: Exibe a imagem do herói premiado
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: rewardingHero.imageUrl,
+                  height: 120,
+                  width: 120,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const SizedBox(
+                    height: 120,
+                    width: 120,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.person, size: 80),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Placar Final: $_victories Vitórias x $_defeats Derrotas ($_draws Empates)',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.shade300),
+                ),
+                child: Text(
+                  '⭐ Recompensa de Honra:\n${rewardingHero.name} subiu de nível e ganhou +1 em ${rewardedStat['label']}!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.green.shade900,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         btnOkText: 'Concluir',
+        btnOkColor: Colors.green.shade700,
         btnOkOnPress: () => Navigator.pop(context),
       ).show();
     } else {
+      // Slide 13: Operação Fracassada com imagem de derrota
       AwesomeDialog(
         context: context,
         dialogType: DialogType.error,
         animType: AnimType.bottomSlide,
-        title: 'Operação Fracassada!',
-        desc: 'O esquadrão não resistiu à investida inimiga.\n'
-            'Placar Final: $_victories Vitórias x $_defeats Derrotas.',
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            children: [
+              const Text(
+                'Operação Fracassada!',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red),
+              ),
+              const SizedBox(height: 12),
+              // Imagem / ilustração de derrota
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.sentiment_very_dissatisfied,
+                  size: 70,
+                  color: Colors.red.shade700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'O esquadrão não resistiu à investida inimiga.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Placar Final: $_victories Vitórias x $_defeats Derrotas',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
         btnOkText: 'Retornar ao QG',
         btnOkColor: Colors.red.shade700,
         btnOkOnPress: () => Navigator.pop(context),

@@ -35,27 +35,34 @@ class HeroModel {
     required this.fullName,
   });
 
+  static int _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    if (value is double) return value.toInt();
+    return 0;
+  }
+
   factory HeroModel.fromJson(Map<String, dynamic> json) {
     var images = json['images'] ?? {};
     var stats = json['powerstats'] ?? {};
     var appearance = json['appearance'] ?? {};
     var biography = json['biography'] ?? {};
     return HeroModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? 'Desconhecido',
-      imageUrl: images['sm'] ?? images['md'] ?? '',
-      imagelLgUrl: images['lg'] ?? images['md'] ?? '',
-      intelligence: stats['intelligence'] ?? 0,
-      strength: stats['strength'] ?? 0,
-      speed: stats['speed'] ?? 0,
-      durability: stats['durability'] ?? 0,
-      power: stats['power'] ?? 0,
-      combat: stats['combat'] ?? 0,
-      gender: appearance['gender'] ?? 'Desconhecido',
-      race: appearance['race'] ?? 'Não informado',
-      alignment: biography['alignment'] ?? 'Neutro',
-      publisher: biography['publisher'] ?? 'Não informado',
-      fullName: biography['fullName'] ?? 'Desconhecido',
+      id: _parseInt(json['id']),
+      name: json['name']?.toString() ?? 'Desconhecido',
+      imageUrl: (images['sm'] ?? images['md'] ?? '').toString(),
+      imagelLgUrl: (images['lg'] ?? images['md'] ?? '').toString(),
+      intelligence: _parseInt(stats['intelligence']),
+      strength: _parseInt(stats['strength']),
+      speed: _parseInt(stats['speed']),
+      durability: _parseInt(stats['durability']),
+      power: _parseInt(stats['power']),
+      combat: _parseInt(stats['combat']),
+      gender: (appearance['gender'] ?? 'Desconhecido').toString(),
+      race: (appearance['race'] ?? 'Não informado').toString(),
+      alignment: (biography['alignment'] ?? 'Neutro').toString(),
+      publisher: (biography['publisher'] ?? 'Não informado').toString(),
+      fullName: (biography['fullName'] ?? 'Desconhecido').toString(),
     );
   }
   Map<String, dynamic> toMap() {
@@ -63,7 +70,7 @@ class HeroModel {
       'id': id,
       'name': name,
       'imageUrl': imageUrl,
-      'imagelLgUrl': imagelLgUrl,
+      'imageLgUrl': imagelLgUrl,
       'intelligence': intelligence,
       'strength': strength,
       'speed': speed,
@@ -82,7 +89,7 @@ class HeroModel {
       id: map['id'] as int,
       name: map['name'] as String,
       imageUrl: map['imageUrl'] as String,
-      imagelLgUrl: map['imagelLgUrl'] as String,
+      imagelLgUrl: (map['imageLgUrl'] ?? map['imagelLgUrl'] ?? '') as String,
       intelligence: map['intelligence'] as int,
       strength: map['strength'] as int,
       speed: map['speed'] as int,

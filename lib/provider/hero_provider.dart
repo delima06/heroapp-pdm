@@ -74,18 +74,32 @@ class HeroProvider extends ChangeNotifier {
     // Validação de idempotência diária: se a data do último sorteio coincidir com a atual, reutiliza o ID
     if (lastDate == today && lastHeroId != null) {
       _dailyHero = await _apiService.getHeroById(lastHeroId);
-      _isLoading = false;
-      notifyListeners();
-      return;
+      // Se encontrou com sucesso o herói salvo, finaliza
+      if (_dailyHero != null) {
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+      // Se retornou nulo (ID inexistente ou falha anterior), continua para sortear um agente válido
     }
 
-    // Se o ciclo virou (nova data), gera número pseudoaleatório entre 1 e 563 e armazena os metadados
-    final randomId = Random().nextInt(563) + 1;
-    _dailyHero = await _apiService.getHeroById(randomId);
+    // Para evitar falha com IDs inexistentes (pois os IDs têm lacunas até 731),
+    // sorteamos uma página entre 1 e 563 com limite 1, garantindo sempre um herói real
+    final randomPage = Random().nextInt(563) + 1;
+    final results = await _apiService.fetchHeroes(page: randomPage, limit: 1);
+
+    if (results.isNotEmpty) {
+      _dailyHero = results.first;
+    } else {
+      // Fallback Offline: sorteia do cache local do SQLite caso esteja sem rede
+      _dailyHero = await _dbHelper.getRandomHeroFromCache();
+    }
     
-    // Grava atomicamente o novo carimbo temporal e a semente sorteada
-    await prefs.setString('dailyHeroDate', today);
-    await prefs.setInt('dailyHeroId', randomId);
+    // Grava atomicamente o novo carimbo temporal e o ID sorteado somente se o herói foi obtido com sucesso
+    if (_dailyHero != null) {
+      await prefs.setString('dailyHeroDate', today);
+      await prefs.setInt('dailyHeroId', _dailyHero!.id);
+    }
 
     _isLoading = false;
     notifyListeners();

@@ -4,7 +4,7 @@ import '../models/HeroModel.dart';
 import '../database/database_helper.dart';
 
 class HeroApiService {
-  static const String localApiUrl = 'http://192.168.0.12:3000/heroes';
+  static const String localApiUrl = 'https://hero-api-4qwf.onrender.com/heroes';
   static const String fallbackApiUrl = 'https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/all.json';
 
   final DatabaseHelper _dbHelper = DatabaseHelper();
@@ -12,14 +12,15 @@ class HeroApiService {
   // Executa busca paginada com resiliência de rede e sincronização em cache local (padrão Offline-First)
   Future<List<HeroModel>> fetchHeroes({required int page, required int limit}) async {
     try {
-      // 1. Camada Primária: Realiza requisição HTTP GET para a API REST com timeout defensivo de 4 segundos
-      final uri = Uri.parse('$localApiUrl?_page=$page&_limit=$limit');
-      final response = await http.get(uri).timeout(const Duration(seconds: 4));
+      // 1. Camada Primária: Realiza requisição HTTP GET para a API REST com timeout defensivo de 25 segundos (acomoda cold start do Render)
+      final uri = Uri.parse('$localApiUrl?_page=$page&_limit=$limit&_per_page=$limit');
+      final response = await http.get(uri).timeout(const Duration(seconds: 25));
       
       if (response.statusCode == 200) {
         // Desserializa o JSON recebido em lista de objetos de domínio HeroModel
-        final List<dynamic> data = json.decode(response.body);
-        final heroes = data.map((json) => HeroModel.fromJson(json)).toList();
+        final dynamic decoded = json.decode(response.body);
+        final List<dynamic> data = decoded is List ? decoded : (decoded['data'] as List? ?? []);
+        final heroes = data.map((item) => HeroModel.fromJson(item as Map<String, dynamic>)).toList();
         
         // Persiste os dados recebidos no banco SQLite local para viabilizar consultas desconectadas posteriores
         await _dbHelper.saveHeroesCache(heroes);
@@ -39,10 +40,11 @@ class HeroApiService {
       // 3. Camada Terciária (Fallback Remoto): Caso o banco local esteja frio (vazio) e a API local inacessível,
       // consome o dump completo remoto via CDN, armazena no cache local e aplica paginação em memória (skip/take)
       try {
-        final response = await http.get(Uri.parse(fallbackApiUrl)).timeout(const Duration(seconds: 5));
+        final response = await http.get(Uri.parse(fallbackApiUrl)).timeout(const Duration(seconds: 10));
         if (response.statusCode == 200) {
-          final List<dynamic> allData = json.decode(response.body);
-          final allHeroes = allData.map((json) => HeroModel.fromJson(json)).toList();
+          final dynamic decoded = json.decode(response.body);
+          final List<dynamic> allData = decoded is List ? decoded : (decoded['data'] as List? ?? []);
+          final allHeroes = allData.map((item) => HeroModel.fromJson(item as Map<String, dynamic>)).toList();
           await _dbHelper.saveHeroesCache(allHeroes);
           return allHeroes.skip(offset).take(limit).toList();
         }
@@ -55,7 +57,7 @@ class HeroApiService {
   Future<HeroModel?> getHeroById(int id) async {
     try {
       final uri = Uri.parse('$localApiUrl/$id');
-      final response = await http.get(uri).timeout(const Duration(seconds: 4));
+      final response = await http.get(uri).timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
         return HeroModel.fromJson(json.decode(response.body));
       }

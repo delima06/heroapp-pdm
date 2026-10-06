@@ -8,15 +8,15 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'HERO APP - QG DOS HERÓIS',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          'VANGUARD HEROES',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, letterSpacing: 1.2),
         ),
         centerTitle: true,
-        backgroundColor: Colors.indigo.shade800,
+        backgroundColor: Colors.indigo.shade900,
         foregroundColor: Colors.white,
       ),
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -28,26 +28,61 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Icon(
-              Icons.shield_outlined,
-              size: 80,
-              color: Colors.indigo,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'COMANDO TÁTICO',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 110,
+                  height: 110,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.indigo.shade900.withValues(alpha: 0.35),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.shield,
+                        size: 80,
+                        color: Colors.indigo,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 36),
+              const SizedBox(height: 14),
+              const Text(
+                'COMANDO TÁTICO',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black87,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Central Estratégica de Heróis e Esquadrões',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.indigo.shade900,
+                ),
+              ),
+              const SizedBox(height: 28),
 
             _buildMenuButton(
               context: context,
@@ -90,8 +125,9 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildMenuButton({
     required BuildContext context,

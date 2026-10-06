@@ -1,91 +1,125 @@
-# HeroApp PDM - Guia do Projeto e Diretrizes para IA
+# 🛡️ Vanguard Heroes - Comando Tático
 
-Este repositório contém o trabalho prático da disciplina de **Desenvolvimento para Dispositivos Móveis (PDM)**, ministrada pelo professor **Taniro C. Rodrigues** na UFRN.
-
----
-
-## ⚠️ DIRETRIZES CRÍTICAS PARA A IA (LEIA ANTES DE ORIENTAR O ALUNO)
-
-Se uma nova sessão for iniciada, a IA **DEVE** seguir estas regras estritamente:
-
-1. **MODO PAIR PROGRAMMING PEDAGÓGICO:**
-   - **NÃO crie ou edite arquivos de código Dart diretamente** com ferramentas automáticas.
-   - Forneça o código no chat, explique **linha por linha o que faz e o porquê**, e deixe o **ALUNO escrever/colar** e entender ativamente. O professor fará uma entrevista oral individual cobrando a explicação do código.
-   - Sempre aponte pequenos erros de digitação (typos, imports, pontos e vírgulas) com clareza.
-
-2. **REGRAS E ESCOPO DAS AULAS (SEM CÓDIGO AVANÇADO):**
-   - O projeto deve seguir estritamente o que foi ensinado nos slides das Aulas 04, 05, 06, 08, 09, 11 e 12 presentes na raiz do repositório.
-   - Não use arquiteturas complexas (como Clean Architecture com BLoC, Riverpod, MobX, GetX, etc.). O gerenciamento de estado obrigatório é com **`provider`**.
-   - Se for necessário algo fora dos slides, a IA **deve avisar o aluno antes**.
-
-3. **PADRÃO ESPECÍFICO DO PROFESSOR PARA PROVIDER (AULA 11):**
-   - O professor exige a classe `ConfigureProviders` com o método estático `Future<ConfigureProviders> createDependencyTree() async`.
-   - Ela retorna uma lista de `SingleChildWidget` contendo `ChangeNotifierProvider<...>.value(...)`.
-   - No `main()`, o app inicializa com `WidgetsFlutterBinding.ensureInitialized()`, aguarda `ConfigureProviders.createDependencyTree()` e envolve o `MyApp` em um `MultiProvider(providers: data.providers, child: MyApp())`.
-
-4. **REQUISITOS DA AULA 12 (TRABALHO 1):**
-   - **Offline-First:** Dados da API salvos no SQLite local (`sqflite`). Sem internet, o app busca do cache local.
-   - **Bibliotecas Obrigatórias:**
-     - `http` (ou `dio`) para consumir o mock.
-     - `sqflite` e `path` para banco local (contrato + helper).
-     - `provider` (com `ConfigureProviders`).
-     - `shared_preferences` (sorteio diário de 1 herói).
-     - `infinite_scroll_pagination` (listagem do catálogo com `PagedListView`).
-     - `cached_network_image` (cache de imagens).
-     - `primer_progress_bar` (barras dos 6 atributos na tela de detalhes).
-     - `awesome_dialog` (confirmação ao dispensar herói e feedback da missão).
-   - **Telas:**
-     1. *Tela Inicial*: 4 opções (Agentes, Contrato Diário, Meu Esquadrão, Missões).
-     2. *Agentes (Catálogo Geral)*: Scroll infinito, cache SQLite, miniatura e card com powerstats.
-     3. *Detalhes do Agente*: Imagem alta resolução, dados gerais e 6 barras de progresso (`primer_progress_bar`).
-     4. *Contrato Diário*: 1 sorteio a cada 24h via `SharedPreferences`. Botão "Recrutar" salva no SQLite (limite 15 heróis).
-     5. *Meu Esquadrão*: Lista os heróis recrutados (máx 15) com papel tático / maior atributo. Toque abre tela de detalhes com botão "Dispensar" usando `awesome_dialog`.
-     6. *Missões*: Mínimo 5 agentes no esquadrão. Batalha de 3 a 5 rounds contra vilão sorteado. Grid 3x5 de seleção. Sem repetição de agente por missão. Resultado e premiação (+1 de atributo) via `awesome_dialog`.
+Aplicativo móvel desenvolvido em **Flutter** para a disciplina de **Desenvolvimento para Dispositivos Móveis (PDM)** do curso de Tecnologia em Análise e Desenvolvimento de Sistemas (TADS) da **Universidade Federal do Rio Grande do Norte (UFRN)**, sob orientação do professor **Taniro C. Rodrigues**.
 
 ---
 
-## 📁 Estrutura de Pastas do Projeto
+## 📱 Sobre o Projeto
+
+O **Vanguard Heroes** é uma plataforma tática de gerenciamento e combate de super-heróis inspirada no universo dos quadrinhos. O aplicativo consome um banco de dados de mais de 560 heróis, permitindo ao usuário explorar o catálogo geral, recrutar novos agentes diariamente, administrar um esquadrão exclusivo de até 15 integrantes e participar de missões táticas por rodadas com evolução de atributos.
+
+O app adota arquitetura **Offline-First**, garantindo que todas as telas e operações essenciais continuem funcionando perfeitamente mesmo sem conexão ativa com a internet.
+
+---
+
+## 🚀 Funcionalidades Principais
+
+### 1. 🏢 Quartel-General (Home)
+* Tela inicial com identidade visual moderna e logo oficial do **Vanguard Heroes**.
+* Acesso direto e fluido aos 4 módulos operacionais do aplicativo.
+
+### 2. 👥 Catálogo de Agentes
+* Listagem completa e paginada de todos os 563 super-heróis utilizando `infinite_scroll_pagination`.
+* Cards informativos com foto em miniatura (`cached_network_image`), nome, editora (Marvel, DC, etc.), gênero, raça e powerstats principais.
+* Cache automático no banco local **SQLite** à medida que novas páginas são navegadas.
+
+### 3. 🔍 Ficha Técnica do Agente
+* Exibição da imagem oficial em alta resolução com tratamento de carregamento e erro.
+* Seção biográfica completa: nome real, local de nascimento, primeira aparição, alinhamento moral e afiliações.
+* Gráfico de barras dos 6 atributos táticos (`primer_progress_bar`): Inteligência, Força, Velocidade, Durabilidade, Poder e Combate.
+
+### 4. 📅 Contrato Diário (Convocação 24h)
+* Sistema determinístico de sorteio de 1 agente a cada ciclo de 24 horas utilizando `SharedPreferences`.
+* O herói sorteado pode ser analisado e recrutado para o esquadrão tático com um clique.
+* Validação de limite máximo de 15 agentes e proteção contra recrutamento duplicado.
+
+### 5. 🎖️ Meu Esquadrão
+* Gestão completa dos heróis recrutados pelo jogador através do Contrato Diário (limite máximo de 15 agentes).
+* Identificação do **Papel Tático** do agente com base no seu maior atributo (ex: *Líder Estrategista*, *Tanque de Choque*, *Especialista em Combate*, *Velocista Tático*).
+* Tela individual com opção de dispensar agente do esquadrão, com diálogo de confirmação interativo estilizado via `awesome_dialog`.
+
+### 6. ⚔️ Central de Missões Táticas
+* Exige esquadrão mínimo de 5 agentes operacionais.
+* Simulação de batalhas dinâmicas de 3 a 5 rounds contra vilões e rivais sorteados.
+* Cada round sorteia um atributo em disputa (ex: Força contra Força, Inteligência contra Inteligência).
+* Grid de seleção tática com regra estrita: **cada agente só pode lutar em 1 round por missão**.
+* Ao vencer a missão, todos os agentes do esquadrão que triunfaram em seus rounds recebem **+1 permanente no atributo vitorioso**, persistido no SQLite local.
+* Diálogos de vitória ou derrota com ilustrações temáticas via `awesome_dialog`.
+
+---
+
+## 🏛️ Arquitetura e Padrões de Projeto
 
 ```text
-heroapp-pdm/
-├── lib/
-│   ├── database/
-│   │   ├── hero_contract.dart     # Contrato de tabelas e colunas (Aula 08)
-│   │   └── database_helper.dart   # Singleton Helper com SQLite/sqflite (Aula 08)
-│   ├── models/
-│   │   └── HeroModel.dart         # Modelo com fromJson, toMap, fromMap, stats (Aula 06/08)
-│   ├── provider/ (ou providers/)
-│   │   ├── hero_provider.dart     # ChangeNotifier com estado do esquadrão e sorteio diário
-│   │   └── configure_providers.dart # Árvore de dependências (Aula 11)
-│   ├── screens/                   # Telas do aplicativo
-│   │   ├── home_screen.dart
-│   │   ├── agents_screen.dart
-│   │   ├── agent_detail_screen.dart
-│   │   ├── daily_contract_screen.dart
-│   │   ├── squad_screen.dart
-│   │   ├── squad_detail_screen.dart
-│   │   └── mission_screen.dart
-│   ├── services/
-│   │   └── hero_api_service.dart  # Chamadas HTTP com fallback offline
-│   └── main.dart                  # Inicialização com MultiProvider
-├── db.json                        # Mock dos heróis para o json-server
-└── pubspec.yaml                   # Dependências do projeto
+               ┌─────────────────────────────────┐
+               │     Telas e Widgets (UI)        │
+               └────────────────┬────────────────┘
+                                │ Consumer / context.watch / context.read
+               ┌────────────────▼────────────────┐
+               │    HeroProvider (ChangeNotifier)│
+               └────────┬────────────────┬───────┘
+                        │                │
+         Requisições    │                │ Operações CRUD
+         com Fallback   ▼                ▼ Local
+               ┌────────────────┐┌───────────────┐
+               │ HeroApiService ││DatabaseHelper │
+               │  (Render API)  ││ (SQLite Local)│
+               └────────────────┘└───────────────┘
 ```
+
+* **Offline-First:** O app consome a API REST hospedada na nuvem e grava o espelho dos dados na tabela `heroes_cache` do SQLite. Caso a rede falhe ou fique sem sinal, o aplicativo lê instantaneamente do banco local.
+* **Singleton Pattern:** Implementado na classe `DatabaseHelper` (`_internal()`), garantindo uma única instância e conexão ativa com o banco `heroapp.db`.
+* **State Management (Provider):** Gerenciamento centralizado reativo com `HeroProvider` estendendo `ChangeNotifier`.
+* **Dependency Tree (`ConfigureProviders`):** Inicialização antecipada assíncrona antes da renderização do primeiro frame (`WidgetsFlutterBinding.ensureInitialized()`).
+* **Persistência Temporal:** `SharedPreferences` para controle de data ISO e controle de sorteio diário de 24h.
 
 ---
 
-## 🛠️ Status Atual do Projeto
+## 📦 Bibliotecas e Tecnologias
 
-- [x] Criação do projeto Flutter (`heroapp_pdm`).
-- [x] Instalação de todas as dependências no `pubspec.yaml`.
-- [x] Configuração de permissões de internet e `usesCleartextTraffic` no `AndroidManifest.xml`.
-- [x] Geração do arquivo `db.json` com os 563 heróis.
-- [x] Criação de `lib/models/HeroModel.dart`.
-- [x] Criação de `lib/database/hero_contract.dart`.
-- [x] Criação de `lib/database/database_helper.dart`.
-- [x] Criação de `lib/services/hero_api_service.dart`.
-- [x] Criação de `lib/provider/hero_provider.dart` e `configure_providers.dart` (necessita de pequenos ajustes de sintaxe listados abaixo).
-- [ ] Ajustar sintaxe em `hero_provider.dart` e `configure_providers.dart`.
-- [ ] Configuração do `lib/main.dart` com rotas e `ConfigureProviders`.
-- [ ] Construção das Telas (`screens/`).
-- [ ] Testes no dispositivo móvel / emulador.
+| Pacote | Finalidade no Projeto |
+| :--- | :--- |
+| **`flutter`** / **`dart`** | SDK e linguagem base do projeto |
+| **`provider`** | Gerenciamento de estado reativo e injeção de dependência |
+| **`sqflite`** & **`path`** | Banco de dados relacional SQLite local |
+| **`http`** | Consumo de API REST remota com paginação |
+| **`shared_preferences`** | Persistência leve chave-valor para o ciclo de 24h |
+| **`infinite_scroll_pagination`** | Paginação infinita otimizada no catálogo de heróis |
+| **`cached_network_image`** | Download, cache em disco e placeholder de imagens |
+| **`primer_progress_bar`** | Barras de progresso estilizadas para os 6 powerstats |
+| **`awesome_dialog`** | Diálogos modais animados para confirmações e missões |
+
+---
+
+## 💻 Como Executar o Projeto
+
+### Pré-requisitos
+* Flutter SDK (versão 3.x ou superior)
+* Android Studio / SDK configurado
+* Dispositivo físico Android conectado via USB/Wi-Fi com depuração ativada (ou emulador Android)
+
+### Passo a Passo
+
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/delima06/heroapp-pdm.git
+   cd heroapp-pdm
+   ```
+
+2. **Instale as dependências:**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Execute o aplicativo:**
+   ```bash
+   flutter run
+   ```
+
+---
+
+## 👨‍💻 Autor
+
+* **Thiago de Lima** - [GitHub](https://github.com/delima06)  
+* Curso de Tecnologia em Análise e Desenvolvimento de Sistemas (TADS) - UFRN  
+* Disciplina de Desenvolvimento para Dispositivos Móveis (PDM) - 2026
